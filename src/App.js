@@ -1,58 +1,78 @@
 import React, { Component } from 'react';
 import './App.css';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
-// function HelloWorld(props) {
-// 	return (
-// 		<div className='hello'>
-// 			<h3>{props.subtitle}</h3>
-// 			{props.mytext}
-// 		</div>
-// 	);
-// }
+///data
+import tasks from './sample/tasks.json';
 
-class HelloWorld extends Component {
+///componentes
+import Tasks from './components/Tasks';
+import TaskForm from './components/TaskForm';
+import Posts from './components/Posts';
+
+class App extends Component {
 	state = {
-		show: true
+		tasks: tasks
 	};
 
-	///se crea una function para hacer bind en la class
-	toggleShow = () => {
-		this.setState({ show: !this.state.show });
+	addTask = (title, description) => {
+		const newTask = {
+			title: title,
+			description: description,
+			id: this.state.tasks.length
+		};
+		this.setState({
+			tasks: [...this.state.tasks, newTask]
+		});
 	};
 
-	///en los componentes por clase se usa un render antes que el return
+	deleteTask = id => {
+		const newTasks = this.state.tasks.filter(task => task.id !== id);
+		this.setState({
+			tasks: newTasks
+		});
+	};
+
+	checkDone = id => {
+		const newTasks = this.state.tasks.map(task => {
+			if (task.id === id) {
+				task.done = !task.done;
+			}
+			return task;
+		});
+		this.setState({
+			tasks: newTasks
+		});
+	};
+
 	render() {
-		if (this.state.show) {
-			return (
-				<div className='hello'>
-					<h3>{this.props.subtitle}</h3>
-					{this.props.mytext}
+		return (
+			<div>
+				<Router>
+					<Link to='/'>Home</Link>
 					<br />
-					<br />
-					<button onClick={this.toggleShow}>Ocultar Elemento!</button>
-				</div>
-			);
-		} else {
-			return (
-				<div>
-					<h1>Elemento Oculto!</h1>
-					<br />
-					<button onClick={this.toggleShow}>Reactivar Elemento!</button>
-				</div>
-			);
-		}
+					<Link to='/posts'>Posts</Link>
+					<Route
+						exact
+						path='/'
+						render={() => {
+							return (
+								<div>
+									<TaskForm addTask={this.addTask} />
+									<Tasks
+										tasks={this.state.tasks}
+										deleteTask={this.deleteTask}
+										checkDone={this.checkDone}
+									/>
+								</div>
+							);
+						}}
+					/>
+					<Route exact path='/posts' component={Posts} />
+				</Router>
+			</div>
+		);
 	}
-}
-
-function App() {
-	return (
-		<div>
-			This is my component:
-			<HelloWorld mytext='Hello Josh' subtitle='lorem ipsum' />
-			<HelloWorld mytext='Hola Mundo' subtitle='lorem ipsum' />
-			<HelloWorld mytext='Hello!' subtitle='lorem ipsum' />
-		</div>
-	);
 }
 
 export default App;
